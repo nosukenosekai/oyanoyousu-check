@@ -25,11 +25,6 @@
  header .inner{max-width:680px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
  .logo{font-size:17px;font-weight:800;color:var(--teal)}.logo span{color:var(--warm)}
  .tag{font-size:11px;color:var(--sub);line-height:1.4;width:100%;margin-top:2px}
- .fontctl{margin-left:auto;display:flex;align-items:center;gap:5px}
- .fontctl .fclabel{font-size:11px;color:var(--sub)}
- .fontctl button{border:1.5px solid var(--line);background:#fff;color:var(--teal);border-radius:8px;padding:7px 11px;font-weight:800;cursor:pointer;font-family:inherit;line-height:1}
- .fontctl button#fz1{font-size:14px}.fontctl button#fz2{font-size:18px}
- .fontctl button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
  h1{font-size:22px;margin:26px 0 6px}
  .lead{color:var(--sub);font-size:14px;margin:0 0 18px}
  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 1px 3px rgba(20,60,70,.04)}
@@ -83,11 +78,6 @@
 <header>
  <div class="inner">
   <div class="logo">親の様子<span>チェック</span></div>
-  <div class="fontctl" role="group" aria-label="文字サイズ">
-   <span class="fclabel">文字</span>
-   <button id="fz1" onclick="setFont(1.25)">標準</button>
-   <button id="fz2" onclick="setFont(1.55)">大</button>
-  </div>
   <div class="tag">認知症“予防”のためのセルフチェック ※これは診断ではありません</div>
  </div>
 </header>
@@ -167,19 +157,8 @@
 
 <script>
 /* ---------- 文字サイズ（高齢者向け・端末に記憶） ---------- */
-function setFont(scale){
- // 有効値は 1.25(標準) / 1.55(大)。それ以外は標準に寄せる
- if(!(Math.abs(scale-1.25)<0.01 || Math.abs(scale-1.55)<0.01)) scale = 1.25;
- document.body.style.zoom = scale;
- try { localStorage.setItem('fontScale', String(scale)); } catch {}
- [['fz1',1.25],['fz2',1.55]].forEach(([id,s])=>{
-  const b = document.getElementById(id); if(b) b.classList.toggle('on', Math.abs(s-scale)<0.01);
- });
-}
-(function initFont(){
- let s = 1.25; try { const v = parseFloat(localStorage.getItem('fontScale')); if(v) s = v; } catch {}
- setFont(s);
-})();
+/* 文字は高齢者向けに常に大きめで固定（切替なし） */
+document.body.style.zoom = 1.55;
 
 /* ---------- 設問定義（臨床尺度ではなく“気づき”観察。断定しない） ---------- */
 // Part A: 家族から見た最近の変化（はい=2 / ときどき=1 / いいえ=0）— スコアが高いほど「変化が気になる」
