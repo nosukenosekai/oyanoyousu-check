@@ -67,6 +67,16 @@
  .cta-box a.soft{background:#fff;color:var(--teal-d);font-weight:700;text-align:center}
  .brain{background:#fff;border:1.5px dashed var(--warm);border-radius:14px;padding:18px;margin:16px 0}
  .brain h3{margin:0 0 4px;font-size:15px;color:var(--warm)}
+ /* ホーム（今日のトレーニング） */
+ .home-greet{font-size:19px;font-weight:800;margin:18px 0 2px}
+ .streak{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#0e7c86,#0a5d65);color:#fff;border-radius:16px;padding:18px;margin:12px 0}
+ .streak .big{font-size:34px;font-weight:800;line-height:1}
+ .streak .lbl{font-size:12.5px;opacity:.95;margin-top:3px}
+ .habit{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;margin:8px 0;font-family:inherit;font-size:15px;cursor:pointer}
+ .habit.on{border-color:var(--teal);background:var(--soft)}
+ .habit .he{font-size:20px;flex:0 0 auto}
+ .habit .hl{flex:1}
+ .habit .hc{color:var(--teal);font-weight:800;flex:0 0 auto;width:18px;text-align:center}
  footer{margin-top:30px;font-size:11.5px;color:var(--sub);line-height:1.8}
  footer hr{border:none;border-top:1px solid var(--line);margin:18px 0}
  .hide{display:none}
@@ -104,12 +114,15 @@
   </div>
 
   <div class="card">
-   <div class="sec-label warm">ご本人が脳の体操</div>
-   <p style="margin:8px 0 4px;font-weight:700;font-size:15.5px">脳の体操（記憶・数字・ことば）</p>
-   <p class="small" style="margin:0 0 14px">ご本人が4つのミニクイズで。「おぼえる・すうじ・ことば集め・思い出す」の結果を、<b>前回の自分</b>とくらべて見守ります。約2〜3分。</p>
-   <button class="btn warm" style="width:100%" onclick="startConvo()">脳の体操をはじめる</button>
+   <div class="sec-label warm">ご本人の毎日</div>
+   <p style="margin:8px 0 4px;font-weight:700;font-size:15.5px">今日のトレーニング（脳の体操＋習慣）</p>
+   <p class="small" style="margin:0 0 14px">毎日つづける“脳の体操”と予防習慣チェック、つづけた日数の記録。続けた分が見える、ご本人のホームです。</p>
+   <button class="btn warm" style="width:100%" onclick="startHome()">今日のトレーニングへ</button>
   </div>
  </section>
+
+ <!-- HOME（本人の毎日：今日のトレーニング＋連続記録＋予防習慣チェック） -->
+ <section id="home" class="hide"></section>
 
  <!-- CONVO（本人向け・会話/ことば遊び・時間とテンポを端末内で計測） -->
  <section id="convo" class="hide">
@@ -159,6 +172,96 @@
 /* ---------- 文字サイズ（高齢者向け・端末に記憶） ---------- */
 /* 文字は高齢者向けに常に大きめで固定（切替なし） */
 document.body.style.zoom = 1.55;
+
+/* ====== 毎日つづける土台：連続記録＋予防習慣（すべて端末内） ====== */
+const ACT_KEY = 'active_dates_v1';   // 取り組んだ日（YYYY-MM-DD）の集合
+const HABIT_KEY = 'habit_log_v1';     // 日付ごとの予防習慣チェック
+function ymd(d){ d = d || new Date(); const m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0'); return d.getFullYear()+'-'+m+'-'+day; }
+function loadActive(){ try { return new Set(JSON.parse(localStorage.getItem(ACT_KEY) || '[]')); } catch { return new Set(); } }
+function saveActive(set){ try { localStorage.setItem(ACT_KEY, JSON.stringify([...set].slice(-400))); } catch {} }
+function markActiveToday(){ const s = loadActive(); s.add(ymd()); saveActive(s); }
+function calcStreak(set){ let d = new Date(); if(!set.has(ymd(d))) d.setDate(d.getDate()-1); let s = 0; while(set.has(ymd(d))){ s++; d.setDate(d.getDate()-1); } return s; }
+function monthCount(set){ const p = ymd().slice(0,7); let n = 0; for(const k of set){ if(k.slice(0,7) === p) n++; } return n; }
+function loadHabits(){ try { return JSON.parse(localStorage.getItem(HABIT_KEY) || '{}'); } catch { return {}; } }
+function saveHabits(o){ try { localStorage.setItem(HABIT_KEY, JSON.stringify(o)); } catch {} }
+
+const HABIT_DEFS = [
+ ['undou','🚶','からだを動かした（散歩・体操）'],
+ ['kaiwa','🗣️','人と話した'],
+ ['shokuji','🐟','バランスよく食べた'],
+ ['suimin','😴','よく眠れた'],
+ ['mizu','💧','水分をとった'],
+];
+
+function startHome(){
+ document.getElementById('intro').classList.add('hide');
+ document.getElementById('result').classList.add('hide');
+ document.getElementById('convo').classList.add('hide');
+ document.getElementById('home').classList.remove('hide');
+ renderHome();
+ window.scrollTo(0,0);
+}
+
+function renderHome(){
+ const act = loadActive();
+ const streak = calcStreak(act), month = monthCount(act), doneToday = act.has(ymd());
+ const habits = (loadHabits()[ymd()]) || {};
+ const habitDone = HABIT_DEFS.filter(([k]) => habits[k]).length;
+ const habitHtml = HABIT_DEFS.map(([k,emo,label]) =>
+   '<button class="habit '+(habits[k]?'on':'')+'" data-k="'+k+'" onclick="toggleHabit(\''+k+'\')">'+
+   '<span class="he">'+emo+'</span><span class="hl">'+label+'</span><span class="hc">'+(habits[k]?'✓':'')+'</span></button>'
+ ).join('');
+ const brain = dailyBrain();
+ const d = new Date();
+ const dateStr = (d.getMonth()+1)+'月'+d.getDate()+'日（'+'日月火水木金土'[d.getDay()]+'）';
+
+ document.getElementById('home').innerHTML = `
+  <div class="home-greet">こんにちは。${dateStr}</div>
+  <p class="small" style="margin:0 0 8px">今日も、すこしずつ。続けることがいちばんの予防です。</p>
+
+  <div class="streak">
+   <div><div class="big"><span id="streakNum">${streak}</span><span style="font-size:16px">日</span></div><div class="lbl">つづけて取り組み中</div></div>
+   <div style="margin-left:auto;text-align:right"><div class="big" style="font-size:22px"><span id="monthNum">${month}</span><span style="font-size:13px">回</span></div><div class="lbl">今月</div></div>
+  </div>
+
+  <div class="card">
+   <div class="sec-label warm" style="margin-bottom:8px">今日の脳の体操</div>
+   <p class="small" style="margin:0 0 12px">記憶・数字・ことばの4つのミニクイズ（約2〜3分）。${doneToday ? '今日はもう取り組みました。もう一度でもOK。' : 'まだ今日は取り組んでいません。'}</p>
+   <button class="btn warm" style="width:100%" onclick="startConvo()">脳の体操をはじめる</button>
+  </div>
+
+  <div class="card">
+   <div class="sec-label" style="margin-bottom:8px">今日の予防習慣チェック（<span id="habitCount">${habitDone}/5</span>）</div>
+   <p class="small" style="margin:0 0 10px">できたものを押してください。運動・会話・食事・睡眠・水分は、脳の元気を守る土台です。</p>
+   ${habitHtml}
+  </div>
+
+  <div class="card">
+   <h3 style="margin:0 0 6px;font-size:16px">🧩 今日の1問</h3>
+   <p style="margin:0 0 10px;font-size:15px">${brain.q}</p>
+   <button class="btn ghost" id="homeBrainBtn" onclick="this.classList.add('hide');document.getElementById('homeBrainA').classList.remove('hide');markActiveToday();var n=document.getElementById('streakNum');if(n)n.textContent=calcStreak(loadActive());var m=document.getElementById('monthNum');if(m)m.textContent=monthCount(loadActive());">答えを見る</button>
+   <p id="homeBrainA" class="hide small" style="margin:8px 0 0;font-size:14px"><b>こたえ：</b>${brain.a}</p>
+  </div>
+
+  <div class="card center">
+   <button class="btn ghost" onclick="location.reload()">最初の画面へ</button>
+  </div>
+ `;
+}
+
+function toggleHabit(k){
+ const all = loadHabits(), day = ymd();
+ all[day] = all[day] || {};
+ all[day][k] = !all[day][k];
+ saveHabits(all); markActiveToday();
+ const on = all[day][k];
+ const btn = document.querySelector('.habit[data-k="'+k+'"]');
+ if(btn){ btn.classList.toggle('on', on); btn.querySelector('.hc').textContent = on ? '✓' : ''; }
+ const cnt = HABIT_DEFS.filter(([kk]) => all[day][kk]).length;
+ const lbl = document.getElementById('habitCount'); if(lbl) lbl.textContent = cnt + '/5';
+ const sn = document.getElementById('streakNum'); if(sn) sn.textContent = calcStreak(loadActive());
+ const mn = document.getElementById('monthNum'); if(mn) mn.textContent = monthCount(loadActive());
+}
 
 /* ---------- 設問定義（臨床尺度ではなく“気づき”観察。断定しない） ---------- */
 // Part A: 家族から見た最近の変化（はい=2 / ときどき=1 / いいえ=0）— スコアが高いほど「変化が気になる」
@@ -792,6 +895,7 @@ function clearLog(){
 }
 
 function showConvoResult(){
+ markActiveToday(); // 脳の体操に取り組んだ＝今日の記録に反映（連続記録）
  const log = loadLog();
  const prev = log.length ? log[log.length-1] : null;
 
@@ -885,7 +989,7 @@ function showConvoResult(){
    <p class="small" style="margin:0 0 12px"><b>毎日、または週に1回</b>つづけると、自分の変化に気づきやすくなります。</p>
    <div class="row">
     <button class="btn warm" onclick="startConvo()">もう一度やってみる</button>
-    <button class="btn ghost" style="flex:1" onclick="location.reload()">最初の画面へ</button>
+    <button class="btn ghost" style="flex:1" onclick="startHome()">ホームへ戻る</button>
    </div>
   </div>
  `;
