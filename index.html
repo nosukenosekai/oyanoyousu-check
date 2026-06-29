@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>親の様子チェック｜認知症予防セルフチェック</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0e7c86" />
+<meta name="description" content="ご家族向けの認知症“予防”セルフチェックと、ご本人の脳の体操。診断ではありません。入力は端末内で完結し外部に送信されません。" />
+<!-- iOS ホーム画面に追加（アプリ風）対応 -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="親の様子チェック" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e7c86'/%3E%3Cpath d='M20 40c-6-2-9-7-9-13 0-8 7-14 16-14s16 6 16 12c8 1 12 6 12 12 0 7-6 12-14 12-3 0-6-1-8-3-4 3-9 4-13 2-5-2-7-7-5-12' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+<style>
+ :root{
+  --teal:#0e7c86;--teal-d:#0a5d65;--warm:#e8924a;--ink:#243239;--sub:#7a8a92;
+  --line:#dfe8ea;--bg:#f1f6f6;--ok:#2a9d6f;--soft:#eef6f6;
+ }
+ *{box-sizing:border-box}
+ html,body{margin:0;font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;color:var(--ink);background:var(--bg);line-height:1.7}
+ .wrap{max-width:680px;margin:0 auto;padding:0 16px 60px}
+ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+ header .inner{max-width:680px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+ .logo{font-size:17px;font-weight:800;color:var(--teal)}.logo span{color:var(--warm)}
+ .tag{font-size:11px;color:var(--sub);line-height:1.4;width:100%;margin-top:2px}
+ .fontctl{margin-left:auto;display:flex;align-items:center;gap:5px}
+ .fontctl .fclabel{font-size:11px;color:var(--sub)}
+ .fontctl button{border:1.5px solid var(--line);background:#fff;color:var(--teal);border-radius:8px;padding:7px 11px;font-weight:800;cursor:pointer;font-family:inherit;line-height:1}
+ .fontctl button#fz1{font-size:12px}.fontctl button#fz2{font-size:15px}.fontctl button#fz3{font-size:18px}
+ .fontctl button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+ h1{font-size:22px;margin:26px 0 6px}
+ .lead{color:var(--sub);font-size:14px;margin:0 0 18px}
+ .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 1px 3px rgba(20,60,70,.04)}
+ .note{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--teal-d)}
+ .note b{color:var(--teal-d)}
+ .btn{display:inline-block;border:none;border-radius:12px;padding:14px 22px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
+ .btn.primary{background:var(--teal);color:#fff;width:100%}
+ .btn.primary:hover{background:var(--teal-d)}
+ .btn.ghost{background:#fff;color:var(--teal);border:1.5px solid var(--teal)}
+ .btn.warm{background:var(--warm);color:#fff}
+ .btn:disabled{opacity:.4;cursor:default}
+ .row{display:flex;gap:10px;flex-wrap:wrap}
+ .row .btn{flex:1}
+ .prog{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:6px 0 18px}
+ .prog>i{display:block;height:100%;background:var(--teal);transition:width .3s}
+ .step{font-size:12px;color:var(--sub);margin-bottom:4px}
+ .q{font-size:18px;font-weight:700;margin:6px 0 16px}
+ .opts{display:flex;flex-direction:column;gap:10px}
+ .opt{border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;font-size:15px;cursor:pointer;background:#fff;text-align:left;font-family:inherit;transition:.15s}
+ .opt:hover{border-color:var(--teal);background:var(--soft)}
+ .opt.sel{border-color:var(--teal);background:var(--soft);font-weight:700}
+ .sec-label{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--teal);border-radius:99px;padding:3px 10px;margin-bottom:8px}
+ .sec-label.warm{background:var(--warm)}
+ /* result */
+ .gauge{display:flex;align-items:center;gap:14px;margin:10px 0 6px}
+ .gauge .face{font-size:40px}
+ .gauge .lv{font-size:20px;font-weight:800}
+ .gauge .lv small{display:block;font-size:12.5px;font-weight:500;color:var(--sub);margin-top:2px}
+ .bars{margin:14px 0}
+ .bar{margin:10px 0}
+ .bar .t{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+ .bar .track{height:9px;background:var(--line);border-radius:99px;overflow:hidden}
+ .bar .track>i{display:block;height:100%;border-radius:99px}
+ .habits li{margin:8px 0;font-size:14.5px}
+ .cta-box{background:linear-gradient(135deg,#0e7c86,#0a5d65);color:#fff;border-radius:16px;padding:22px;margin:18px 0}
+ .cta-box h3{margin:0 0 8px;font-size:17px}
+ .cta-box p{margin:0 0 14px;font-size:13.5px;opacity:.95}
+ .cta-box a.link{display:block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#fff;text-decoration:none;border-radius:10px;padding:12px 14px;margin:8px 0;font-size:14px}
+ .cta-box a.link b{display:block;font-size:11px;opacity:.85;font-weight:500}
+ .cta-box a.soft{background:#fff;color:var(--teal-d);font-weight:700;text-align:center}
+ .brain{background:#fff;border:1.5px dashed var(--warm);border-radius:14px;padding:18px;margin:16px 0}
+ .brain h3{margin:0 0 4px;font-size:15px;color:var(--warm)}
+ footer{margin-top:30px;font-size:11.5px;color:var(--sub);line-height:1.8}
+ footer hr{border:none;border-top:1px solid var(--line);margin:18px 0}
+ .hide{display:none}
+ .center{text-align:center}
+ .small{font-size:12px;color:var(--sub)}
+</style>
+</head>
+<body>
+<header>
+ <div class="inner">
+  <div class="logo">親の様子<span>チェック</span></div>
+  <div class="fontctl" role="group" aria-label="文字サイズ">
+   <span class="fclabel">文字</span>
+   <button id="fz1" onclick="setFont(1)">標準</button>
+   <button id="fz2" onclick="setFont(1.25)">大</button>
+   <button id="fz3" onclick="setFont(1.55)">特大</button>
+  </div>
+  <div class="tag">認知症“予防”のためのセルフチェック ※これは診断ではありません</div>
+ </div>
+</header>
+
+<div class="wrap">
+
+ <!-- INTRO -->
+ <section id="intro">
+  <h1>最近、親のこんな様子、<br>気になっていませんか。</h1>
+  <p class="lead">「同じ話を何度もする」「約束を忘れる」——気のせいかな、と流してしまいがちな小さな変化。<br>ご家族から見た“気づき”と、今日からできる予防習慣を、3分でやさしく整理します。</p>
+
+  <div class="note">
+   <b>大切なお願い</b><br>
+   これは<b>医学的な診断ではありません</b>。認知症かどうかを判定するものではなく、ご家族が様子に気づき、専門機関に相談するきっかけと、予防習慣を見つけるためのものです。気になる点があれば、必ず<b>かかりつけ医や地域包括支援センター</b>にご相談ください。
+  </div>
+
+  <div class="note" style="margin-top:10px">
+   🔒 入力した内容は<b>この端末の中だけ</b>で処理され、外部のサーバーへは送信されません。「ことばの会話」の記録も、この端末の中にだけ保存されます（いつでも消せます）。
+  </div>
+
+  <p class="lead" style="margin:22px 0 8px;font-weight:700;color:var(--ink)">2つの入り口から選べます</p>
+
+  <div class="card">
+   <div class="sec-label">ご家族がチェック</div>
+   <p style="margin:8px 0 4px;font-weight:700;font-size:15.5px">最近の様子・予防の習慣チェック</p>
+   <p class="small" style="margin:0 0 14px">親の変化が気になるご家族へ。約3分／全16問・3択。</p>
+   <button class="btn primary" onclick="start()">家族でチェックする</button>
+  </div>
+
+  <div class="card">
+   <div class="sec-label warm">ご本人が脳の体操</div>
+   <p style="margin:8px 0 4px;font-weight:700;font-size:15.5px">脳の体操（記憶・数字・ことば）</p>
+   <p class="small" style="margin:0 0 14px">ご本人が4つのミニクイズで。「おぼえる・すうじ・ことば集め・思い出す」の結果を、<b>前回の自分</b>とくらべて見守ります。約2〜3分。</p>
+   <button class="btn warm" style="width:100%" onclick="startConvo()">脳の体操をはじめる</button>
+  </div>
+ </section>
+
+ <!-- CONVO（本人向け・会話/ことば遊び・時間とテンポを端末内で計測） -->
+ <section id="convo" class="hide">
+  <div class="step" id="cStep"></div>
+  <div class="prog"><i id="cProg" style="width:0"></i></div>
+  <div class="card">
+   <div id="cSec"></div>
+   <div class="q" id="cText" style="margin-bottom:6px"></div>
+   <p class="small" id="cHint" style="margin:0 0 14px"></p>
+   <div id="cTimer" class="center" style="font-size:13px;color:var(--warm);font-weight:700;margin-bottom:10px"></div>
+   <div id="cBody"></div>
+  </div>
+  <div class="row">
+   <button class="btn ghost" onclick="startConvo()" style="flex:0 0 auto">最初から</button>
+   <div style="flex:1"></div>
+  </div>
+ </section>
+
+ <!-- QUIZ -->
+ <section id="quiz" class="hide">
+  <div class="step" id="stepLabel"></div>
+  <div class="prog"><i id="progBar" style="width:0"></i></div>
+  <div class="card">
+   <div id="secLabel"></div>
+   <div class="q" id="qText"></div>
+   <div class="opts" id="opts"></div>
+  </div>
+  <div class="row">
+   <button class="btn ghost" id="backBtn" onclick="back()" style="flex:0 0 auto">← 戻る</button>
+   <div style="flex:1"></div>
+  </div>
+ </section>
+
+ <!-- RESULT -->
+ <section id="result" class="hide"></section>
+
+ <footer>
+  <hr>
+  <b>免責</b>：本ツールは認知症の予防意識を高め、ご家族の“気づき”を支援する目的の簡易セルフチェックです。医学的診断・医療行為ではなく、結果は病気の有無を示すものではありません。健康状態のご判断は必ず医療機関で受けてください。<br>
+  <b>プライバシー</b>：入力内容はお使いの端末内のみで処理し、サーバーへの送信・保存は一切行いません。<br>
+  <hr>
+  <span class="small">提供：株式会社AIdollargame ／ 認知症予防AI（β）</span>
+ </footer>
+</div>
+
+<script>
+/* ---------- 文字サイズ（高齢者向け・端末に記憶） ---------- */
+function setFont(scale){
+ document.body.style.zoom = scale;
+ try { localStorage.setItem('fontScale', String(scale)); } catch {}
+ [['fz1',1],['fz2',1.25],['fz3',1.55]].forEach(([id,s])=>{
+  const b = document.getElementById(id); if(b) b.classList.toggle('on', Math.abs(s-scale)<0.01);
+ });
+}
+(function initFont(){
+ let s = 1; try { s = parseFloat(localStorage.getItem('fontScale')) || 1; } catch {}
+ setFont(s);
+})();
+
+/* ---------- 設問定義（臨床尺度ではなく“気づき”観察。断定しない） ---------- */
+// Part A: 家族から見た最近の変化（はい=2 / ときどき=1 / いいえ=0）— スコアが高いほど「変化が気になる」
+const PART_A = [
+ "同じ話や質問を、短い間に何度も繰り返すことが増えた",
+ "約束や予定、用事をうっかり忘れることが増えた",
+ "財布・鍵・通帳など、物の置き場所がわからず探すことが増えた",
+ "料理の味付けや手順が変わった／作る品数が減った",
+ "今日が何月何日か、あいまいなことがある",
+ "慣れた道や買い物先で、迷ったり戸惑ったりすることがあった",
+ "お金や支払いの管理（お釣り・通帳記帳など）に手間取るようになった",
+ "趣味や外出、人と会うのを以前より億劫がるようになった",
+ "些細なことで怒りっぽくなった／気分の波が大きくなった",
+ "服装や身だしなみ、片付けへの関心が薄れたように感じる",
+];
+// Part B: 予防習慣（できている=2 / ときどき=1 / あまり=0）— 6領域、各1問
+const PART_B = [
+ {area:"運動",  q:"本人は、週に2〜3回以上、散歩などからだを動かす習慣がある"},
+ {area:"会話",  q:"本人は、家族や友人と毎日のように会話している"},
+ {area:"睡眠",  q:"本人は、夜ぐっすり眠れていて、生活リズムが整っている"},
+ {area:"食事",  q:"本人は、野菜・魚・大豆などをバランスよく食べている"},
+ {area:"知的活動",q:"本人は、読書・新聞・手芸・パズルなど頭を使う活動をしている"},
+ {area:"社会参加",q:"本人は、地域・趣味・通いの場など、外との関わりを持っている"},
+];
+
+const A_OPTS = [["はい",2],["ときどき",1],["いいえ",0]];
+const B_OPTS = [["できている",2],["ときどき",1],["あまり",0]];
+
+/* ---------- 状態 ---------- */
+let queue = [];   // {type:'A'|'B', text, area?, opts}
+let idx = 0;
+let answers = []; // 数値
+
+function buildQueue(){
+ queue = [];
+ PART_A.forEach(t => queue.push({type:'A', text:t, opts:A_OPTS}));
+ PART_B.forEach(b => queue.push({type:'B', text:b.q, area:b.area, opts:B_OPTS}));
+ answers = new Array(queue.length).fill(null);
+}
+
+function start(){
+ buildQueue(); idx = 0;
+ document.getElementById('intro').classList.add('hide');
+ document.getElementById('result').classList.add('hide');
+ document.getElementById('quiz').classList.remove('hide');
+ render();
+ window.scrollTo(0,0);
+}
+
+function render(){
+ const item = queue[idx];
+ const total = queue.length;
+ document.getElementById('progBar').style.width = ((idx)/total*100)+'%';
+ document.getElementById('stepLabel').textContent = `質問 ${idx+1} / ${total}`;
+ const sec = document.getElementById('secLabel');
+ if(item.type==='A'){
+  sec.innerHTML = `<span class="sec-label">最近の様子について</span>`;
+ }else{
+  sec.innerHTML = `<span class="sec-label warm">予防の習慣について（${item.area}）</span>`;
+ }
+ document.getElementById('qText').textContent = item.text;
+ const wrap = document.getElementById('opts');
+ wrap.innerHTML = '';
+ item.opts.forEach(([label,val])=>{
+  const b = document.createElement('button');
+  b.className = 'opt' + (answers[idx]===val ? ' sel':'');
+  b.textContent = label;
+  b.onclick = ()=>choose(val);
+  wrap.appendChild(b);
+ });
+ document.getElementById('backBtn').style.visibility = idx===0 ? 'hidden':'visible';
+}
+
+function choose(val){
+ answers[idx] = val;
+ if(idx < queue.length-1){ idx++; render(); window.scrollTo(0,0); }
+ else { showResult(); }
+}
+function back(){ if(idx>0){ idx--; render(); window.scrollTo(0,0);} }
+
+/* ---------- 結果（断定しない・やさしい言い回し） ---------- */
+function showResult(){
+ // Part A 集計
+ const aVals = answers.slice(0, PART_A.length);
+ const aScore = aVals.reduce((s,v)=>s+v,0);          // 0〜20
+ const aMax = PART_A.length*2;
+ const aRatio = aScore/aMax;
+ // Part B 集計（領域別）
+ const bVals = answers.slice(PART_A.length);
+ const habitWeak = []; // 弱い領域
+ PART_B.forEach((b,i)=>{ if(bVals[i] <= 1) habitWeak.push(b.area); });
+ const bScore = bVals.reduce((s,v)=>s+v,0);
+
+ // 3段階の“気づき”（断定回避）
+ let lv, face, msg, color, advice;
+ if(aRatio < 0.25){
+  lv="気になる点は少なめ"; face="🌿"; color="var(--ok)";
+  msg="今のところ、ご家族から見て大きな変化は少ないようです。この調子で、予防の習慣を続けていけると安心です。";
+  advice="変化は少しずつ進むことがあります。半年に一度、このチェックで様子を見守ってみてください。";
+ }else if(aRatio < 0.55){
+  lv="少し気にかけたい様子"; face="🍃"; color="var(--warm)";
+  msg="いくつか「あれ?」と思う変化が見られるようです。病気とは限りませんが、加齢・疲れ・環境の変化などでも起こります。気になる点はメモして、機会があればかかりつけ医に話してみると安心です。";
+  advice="まずは下の予防習慣から、できそうなものを一緒に始めてみましょう。";
+ }else{
+  lv="一度、相談をおすすめしたい様子"; face="🌼"; color="var(--teal)";
+  msg="ご家族から見て、気になる変化がいくつか重なっているようです。くり返しになりますが、これは診断ではありません。ただ、早めに専門家へ相談すると、原因がはっきりしたり、対応の選択肢が広がります。下の窓口にご相談ください。";
+  advice="“早めの相談”は、ご本人にもご家族にも安心につながります。一人で抱えこまないでください。";
+ }
+
+ // 予防習慣レーダー
+ const barColor = v => v>=2?'var(--ok)': v===1?'var(--warm)':'#d98b8b';
+ let barsHtml = PART_B.map((b,i)=>{
+  const v = bVals[i];
+  const pct = v/2*100;
+  const txt = v>=2?'良い習慣':v===1?'もう一歩':'これから';
+  return `<div class="bar"><div class="t"><span>${b.area}</span><span class="small">${txt}</span></div>
+   <div class="track"><i style="width:${pct}%;background:${barColor(v)}"></i></div></div>`;
+ }).join('');
+
+ // 今日からできる習慣（弱点優先で3つ）
+ const HABIT_TIPS = {
+  "運動":"1日10分の散歩から。買い物や庭仕事も立派な運動です。",
+  "会話":"1日1回、顔を見て話す時間を。電話やビデオ通話でもOK。",
+  "睡眠":"朝に光を浴び、昼寝は20分まで。寝る前のスマホを控えめに。",
+  "食事":"青魚・大豆・緑黄色野菜を意識。よく噛んで食べることも予防に。",
+  "知的活動":"新聞の音読、簡単な計算や塗り絵など“ちょっと頭を使う”習慣を。",
+  "社会参加":"地域の通いの場や趣味の集まりへ。役割があると元気が続きます。",
+ };
+ let pick = habitWeak.slice(0,3);
+ if(pick.length<3){ for(const b of PART_B){ if(pick.length>=3)break; if(!pick.includes(b.area))pick.push(b.area);} }
+ let habitHtml = pick.map(a=>`<li><b>${a}：</b>${HABIT_TIPS[a]}</li>`).join('');
+
+ const brain = dailyBrain();
+
+ const html = `
+  <div class="step center">あなたの気づきマップ</div>
+  <div class="card">
+   <div class="gauge">
+    <div class="face">${face}</div>
+    <div><div class="lv" style="color:${color}">${lv}<small>※病気の有無を示すものではありません</small></div></div>
+   </div>
+   <p style="font-size:14.5px;margin:6px 0 0">${msg}</p>
+   <div class="note" style="margin-top:14px">${advice}</div>
+  </div>
+
+  <div class="card">
+   <div class="sec-label warm" style="margin-bottom:10px">予防の習慣チェック</div>
+   <div class="bars">${barsHtml}</div>
+   <p class="small" style="margin:4px 0 0">「これから」「もう一歩」の領域から始めると、無理なく続きます。</p>
+  </div>
+
+  <div class="card">
+   <h3 style="margin:0 0 6px;font-size:16px">🌱 今日からできる予防習慣</h3>
+   <ul class="habits">${habitHtml}</ul>
+   <div class="brain">
+    <h3>頭の体操・今日の1問</h3>
+    <p style="margin:0 0 10px;font-size:14px">${brain.q}</p>
+    <button class="btn warm" style="padding:9px 16px;font-size:14px" onclick="this.nextElementSibling.classList.remove('hide');this.classList.add('hide')">答えを見る</button>
+    <p class="hide small" style="margin:8px 0 0;font-size:13.5px"><b>こたえ：</b>${brain.a}</p>
+   </div>
+  </div>
+
+  <div class="cta-box">
+   <h3>気になることは、専門の窓口へ</h3>
+   <p>「相談していいのかな」という段階で大丈夫。早めの相談が、ご本人とご家族の安心につながります。</p>
+   <a class="link" href="https://www.kaigokensaku.mhlw.go.jp/houkatsu/" target="_blank" rel="noopener">
+    <b>お住まいの地域包括支援センターを探す（厚生労働省）</b>
+    まずはここへ。介護・認知症の無料相談窓口です ▶
+   </a>
+   <a class="link" href="https://www.e-65.net/" target="_blank" rel="noopener">
+    <b>認知症について知る（認知症の理解・相談情報）</b>
+    病気のこと、対応のヒントを知りたい方へ ▶
+   </a>
+   <a class="link soft" href="#contact" onclick="alert('施設さがし・在宅介護のご相談は、ロイヤル介護の相談員までお気軽に。\\n（※公開デモのため、本番では相談フォーム／電話につながります）');return false;">
+    施設さがし・介護のご相談をする（無料）
+   </a>
+  </div>
+
+  <div class="card center">
+   <p class="small" style="margin:0 0 12px">変化は少しずつ進むことがあります。<br><b>半年に一度</b>、同じチェックで見守るのがおすすめです。</p>
+   <div class="row">
+    <button class="btn ghost" onclick="start()">もう一度チェックする</button>
+    <button class="btn primary" style="flex:1" onclick="shareResult()">家族に知らせる</button>
+   </div>
+  </div>
+ `;
+ const r = document.getElementById('result');
+ r.innerHTML = html;
+ document.getElementById('quiz').classList.add('hide');
+ r.classList.remove('hide');
+ window.scrollTo(0,0);
+}
+
+/* 日替わりではなく“開くたび変わる”簡易脳トレ（端末内で完結） */
+function dailyBrain(){
+ const bank = [
+  {q:"「みかん・りんご・バナナ・トマト」——仲間外れはどれ?理由も考えてみましょう。", a:"トマト（一般に野菜。他は果物）。“なぜ?”と理由を言葉にすることが脳の体操になります。"},
+  {q:"100から7を、3回引いていくといくつ?（100→93→…）", a:"93 → 86 → 79。順に引く計算は注意力と作業記憶を使います。"},
+  {q:"今日の朝ごはんに食べたものを、3つ思い出してみましょう。", a:"思い出す“努力”そのものが記憶の体操。家族で言い合うとさらに効果的です。"},
+  {q:"「い」から始まる言葉を、1分でいくつ言えますか?", a:"数より“絞り出す”過程が大切。指折り数えながら声に出してみましょう。"},
+  {q:"昨日と今日の天気を、声に出して説明してみましょう。", a:"日付・天気を言葉にする習慣は、見当識（今がいつか）の維持に役立ちます。"},
+ ];
+ // Math.randomは使わず、時刻ベースで選ぶ（端末内・保存なし）
+ const i = (new Date().getHours() + new Date().getMinutes()) % bank.length;
+ return bank[i];
+}
+
+function shareResult(){
+ const txt = "認知症“予防”のセルフチェックをやってみました。親の様子が気になる方へ。\n※診断ではありません。気になる点は地域包括支援センターへ。";
+ if(navigator.share){ navigator.share({title:'親の様子チェック', text:txt, url:location.href}).catch(()=>{}); }
+ else { navigator.clipboard?.writeText(txt+"\n"+location.href); alert('共有用のメッセージをコピーしました。'); }
+}
+
+/* ============================================================
+   脳の体操（本人向け・ミニクイズ集）
+   ・タップ/入力で答える＝音声をどこにも送らない（端末内完結）
+   ・おぼえる→すうじ→ことば集め→思い出す の4ステップ
+   ・正常/異常は判定しない。前回の“自分”とだけくらべて見守る
+   ・記録は localStorage（この端末の中だけ）。サーバー送信なし
+   ============================================================ */
+const LOG_KEY = 'kotoba_log_v2';
+let convoStep = 0;
+let convo = {};        // 今回の計測結果
+let convoTimer = null; // fluencyのカウントダウン
+let tShown = 0;        // 設問が出た時刻
+const TOTAL_STEPS = 4;
+
+// すべて曜日で変える（乱数は使わない＝再現性・端末内）
+const DAY = new Date().getDay();
+const FLU_LETTERS = ['か','し','た','い','う','て','の'];
+const MEM_SETS = [
+ ['さくら','ねこ','でんしゃ'],
+ ['うみ','とけい','りんご'],
+ ['やま','いぬ','てがみ'],
+ ['ほし','くるま','みかん'],
+ ['かわ','とり','えんぴつ'],
+ ['つき','はな','じてんしゃ'],
+ ['ゆき','さかな','ぼうし'],
+];
+const MEM_LURES = ['つくえ','くつ','まど','コップ','たまご','ふね','いし','かさ','かばん','きって'];
+const CALC_BANK = [
+ {q:'7 ＋ 8', a:15, c:[13,15,16]},
+ {q:'100 − 7', a:93, c:[83,93,97]},
+ {q:'6 × 3', a:18, c:[15,18,21]},
+ {q:'15 − 9', a:6, c:[5,6,8]},
+ {q:'9 ＋ 6', a:15, c:[14,15,17]},
+ {q:'20 − 8', a:12, c:[11,12,14]},
+ {q:'8 × 2', a:16, c:[14,16,18]},
+ {q:'13 − 5', a:8, c:[7,8,9]},
+ {q:'12 ＋ 9', a:21, c:[19,21,23]},
+];
+function pick3(arr, start){ return [0,1,2].map(i=>arr[((start%arr.length)+i)%arr.length]); }
+
+function startConvo(){
+ if(convoTimer){ clearInterval(convoTimer); convoTimer=null; }
+ convo = {
+  memWords: MEM_SETS[DAY % MEM_SETS.length],
+  letter:   FLU_LETTERS[DAY % FLU_LETTERS.length],
+  calcQs:   pick3(CALC_BANK, DAY),
+  calcIdx: 0, calcCorrect: 0, calcStart: 0,
+  words: [], times: [],
+ };
+ convoStep = 0;
+ document.getElementById('intro').classList.add('hide');
+ document.getElementById('result').classList.add('hide');
+ document.getElementById('convo').classList.remove('hide');
+ renderConvo();
+ window.scrollTo(0,0);
+}
+
+function setConvoChrome(n, secLabel, q, hint){
+ document.getElementById('cStep').textContent = `脳の体操　${n} / ${TOTAL_STEPS}`;
+ document.getElementById('cProg').style.width = ((n-1)/TOTAL_STEPS*100)+'%';
+ document.getElementById('cSec').innerHTML = `<span class="sec-label warm">${secLabel}</span>`;
+ document.getElementById('cText').textContent = q;
+ document.getElementById('cHint').textContent = hint;
+ document.getElementById('cTimer').textContent = '';
+}
+
+function renderConvo(){
+ const body = document.getElementById('cBody');
+
+ // ---- ① おぼえる（記憶エンコード） ----
+ if(convoStep === 0){
+  setConvoChrome(1, 'その① おぼえる', 'つぎの3つの言葉を覚えてください。',
+   'あとで「思い出す」クイズが出ます。声に出すと覚えやすいです。');
+  body.innerHTML = `
+   <div style="display:flex;flex-direction:column;gap:10px;margin:4px 0 2px">
+    ${convo.memWords.map(w=>`<div style="text-align:center;font-size:24px;font-weight:800;color:var(--teal);background:var(--soft);border:1.5px solid var(--line);border-radius:12px;padding:14px">${w}</div>`).join('')}
+   </div>
+   <button class="btn warm" style="width:100%;margin-top:14px" onclick="convoStep=1;renderConvo();window.scrollTo(0,0)">覚えました</button>
+  `;
+  return;
+ }
+
+ // ---- ② すうじ（計算クイズ・タップ／正答数とテンポ） ----
+ if(convoStep === 1){
+  const i = convo.calcIdx, q = convo.calcQs[i];
+  setConvoChrome(2, 'その② すうじ', `${q.q} ＝ ?`,
+   `あてはまる数をえらんでください。（${i+1}問目／全${convo.calcQs.length}問）`);
+  if(i === 0) convo.calcStart = performance.now();
+  body.innerHTML = `
+   <div style="display:flex;flex-direction:column;gap:10px">
+    ${q.c.map(n=>`<button class="opt" style="text-align:center;font-size:22px;font-weight:800" onclick="answerCalc(${n})">${n}</button>`).join('')}
+   </div>
+  `;
+  return;
+ }
+
+ // ---- ③ ことば集め（語想起・流暢性） ----
+ if(convoStep === 2){
+  const letter = convo.letter;
+  setConvoChrome(3, 'その③ ことば集め', `「${letter}」ではじまる言葉を、思いつくだけ。`,
+   `ひとつ入力して Enter（変換の確定では送られません）。制限は30秒です。`);
+  body.innerHTML = `
+   <input id="cWord" type="text" placeholder="${letter}…"
+     style="width:100%;padding:13px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;font-family:inherit" />
+   <div id="cChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px"></div>
+   <div id="cCount" class="small" style="margin-top:8px">あつめた言葉：0個</div>
+   <button class="btn ghost" style="width:100%;margin-top:12px" onclick="finishFluency()">おわる</button>
+  `;
+  convo.words = []; convo.times = [];
+  tShown = performance.now();
+  const w = document.getElementById('cWord');
+  // IME対応：変換確定のEnterでは送らない（chat-enterルール）
+  w.addEventListener('keydown', (e)=>{
+   if(e.key==='Enter' && !e.isComposing && !e.shiftKey){ e.preventDefault(); addWord(); }
+  });
+  setTimeout(()=>w.focus(), 50);
+  let left = 30;
+  document.getElementById('cTimer').textContent = `のこり ${left} 秒`;
+  convoTimer = setInterval(()=>{
+   left--;
+   document.getElementById('cTimer').textContent = `のこり ${left} 秒`;
+   if(left<=0){ finishFluency(); }
+  }, 1000);
+  return;
+ }
+
+ // ---- ④ 思い出す（遅延再生・選択式） ----
+ if(convoStep === 3){
+  setConvoChrome(4, 'その④ 思い出す', 'はじめに覚えた3つの言葉は、どれでしたか?',
+   '覚えている言葉をえらんでください（3つ）。間違えても大丈夫です。');
+  // ダミー3つ（正解と重複しないよう確保）
+  let lures = pick3(MEM_LURES, DAY+2).filter(x=>!convo.memWords.includes(x));
+  for(const x of MEM_LURES){ if(lures.length>=3) break; if(!convo.memWords.includes(x) && !lures.includes(x)) lures.push(x); }
+  // 正解3＋ダミー3を交互に並べ、曜日ぶん回転（乱数なし）
+  const opts = [];
+  for(let k=0;k<3;k++){ opts.push(convo.memWords[k]); opts.push(lures[k]); }
+  const rot = DAY % opts.length;
+  const ordered = opts.slice(rot).concat(opts.slice(0,rot));
+  convo._recallPicked = [];
+  body.innerHTML = `
+   <div id="recallGrid" style="display:flex;flex-wrap:wrap;gap:10px">
+    ${ordered.map(w=>`<button class="opt recallopt" data-w="${w}" style="flex:1 1 40%;text-align:center;font-size:18px;font-weight:700" onclick="toggleRecall(this)">${w}</button>`).join('')}
+   </div>
+   <div id="recallCount" class="small" style="margin-top:10px">えらんだ言葉：0 / 3</div>
+   <button class="btn warm" style="width:100%;margin-top:12px" onclick="finishRecall()">答えあわせ</button>
+  `;
+  return;
+ }
+}
+
+function answerCalc(n){
+ const q = convo.calcQs[convo.calcIdx];
+ if(n === q.a) convo.calcCorrect++;
+ convo.calcIdx++;
+ if(convo.calcIdx < convo.calcQs.length){ renderConvo(); window.scrollTo(0,0); }
+ else { convo.calcMs = Math.round(performance.now() - convo.calcStart); convoStep = 2; renderConvo(); window.scrollTo(0,0); }
+}
+
+function addWord(){
+ const w = document.getElementById('cWord');
+ const v = (w.value||'').trim();
+ if(!v) return;
+ // 間違いも責めない＝そのまま受ける
+ convo.words.push(v);
+ convo.times.push(Math.round(performance.now() - tShown));
+ w.value = '';
+ const c = document.createElement('span');
+ c.textContent = v;
+ c.style.cssText = 'font-size:13px;padding:5px 11px;border-radius:99px;background:var(--soft);border:1px solid var(--line);color:var(--teal-d)';
+ document.getElementById('cChips').appendChild(c);
+ document.getElementById('cCount').textContent = `あつめた言葉：${convo.words.length}個`;
+ w.focus();
+}
+
+function finishFluency(){
+ if(convoTimer){ clearInterval(convoTimer); convoTimer=null; }
+ convo.fluency = (convo.words||[]).length;
+ convo.firstWordMs = (convo.times && convo.times.length) ? convo.times[0] : null;
+ convoStep = 3;
+ renderConvo();
+ window.scrollTo(0,0);
+}
+
+function toggleRecall(btn){
+ const w = btn.dataset.w;
+ const picked = convo._recallPicked;
+ const i = picked.indexOf(w);
+ if(i >= 0){ picked.splice(i,1); btn.classList.remove('sel'); }
+ else { if(picked.length >= 3) return; picked.push(w); btn.classList.add('sel'); }
+ document.getElementById('recallCount').textContent = `えらんだ言葉：${picked.length} / 3`;
+}
+
+function finishRecall(){
+ const picked = convo._recallPicked || [];
+ convo.recall = picked.filter(w => convo.memWords.includes(w)).length; // 0〜3
+ showConvoResult();
+}
+
+function loadLog(){
+ try { return JSON.parse(localStorage.getItem(LOG_KEY) || '[]'); } catch { return []; }
+}
+function saveLog(arr){
+ try { localStorage.setItem(LOG_KEY, JSON.stringify(arr.slice(-12))); } catch {}
+}
+function clearLog(){
+ try { localStorage.removeItem(LOG_KEY); } catch {}
+ alert('この端末の記録を消しました。');
+ startConvo();
+}
+
+function showConvoResult(){
+ const log = loadLog();
+ const prev = log.length ? log[log.length-1] : null;
+
+ const today = new Date().toLocaleDateString('ja-JP');
+ const entry = {
+  t: today,
+  recall: convo.recall ?? 0,            // 0〜3（思い出せた数）
+  memTotal: 3,
+  fluency: convo.fluency ?? 0,          // 集めた言葉の数
+  calcCorrect: convo.calcCorrect ?? 0,
+  calcTotal: (convo.calcQs||[]).length || 3,
+  calcMs: convo.calcMs ?? null,
+ };
+
+ const sec = ms => ms==null ? '—' : (ms/1000).toFixed(1)+'秒';
+ // 前回の自分とだけ比較・断定しない
+ function cmp(now, before, biggerIsBetter){
+  if(before==null || now==null) return {txt:'（はじめての記録）', cls:'var(--sub)'};
+  if(now===before) return {txt:'前回と同じくらい', cls:'var(--sub)'};
+  const better = biggerIsBetter ? now>before : now<before;
+  return better ? {txt:'前回より調子よさそう', cls:'var(--ok)'} : {txt:'前回より少しゆっくり', cls:'var(--warm)'};
+ }
+ const cRecall = cmp(entry.recall, prev?.recall, true);
+ const cCalc   = cmp(entry.calcCorrect, prev?.calcCorrect, true);
+ const cFlu    = cmp(entry.fluency, prev?.fluency, true);
+
+ const lead = 'おつかれさまでした。脳の体操、よくがんばりました。';
+ const sub  = 'これは点数や診断ではありません。大切なのは“前回の自分”との変化を、ゆっくり見守ること。';
+
+ // 気になる変化が続くときだけ、やさしい注意（断定しない）
+ let watch = '';
+ if(prev){
+  const recallDrop = (entry.recall <= prev.recall-2 && prev.recall>=2);
+  const fewer = (prev.fluency>=4 && entry.fluency <= prev.fluency-3);
+  if(recallDrop || fewer){
+   watch = 'もし「思い出しにくい」「言葉が出にくい」と感じる日が<b>何度も続く</b>ようなら、念のため、かかりつけ医や地域包括支援センターで相談してみると安心です。';
+  }
+ }
+
+ const histRows = log.slice(-5).reverse().map(e=>
+   `<tr><td style="padding:5px 8px;color:var(--sub)">${e.t}</td>
+    <td style="padding:5px 8px;text-align:right">${(e.recall??'—')}/${e.memTotal??3}</td>
+    <td style="padding:5px 8px;text-align:right">${(e.calcCorrect??'—')}/${e.calcTotal??3}</td>
+    <td style="padding:5px 8px;text-align:right">${e.fluency??'—'}個</td></tr>`).join('');
+
+ const html = `
+  <div class="step center">脳の体操の記録</div>
+  <div class="card">
+   <p style="font-size:16px;font-weight:700;margin:0 0 4px">${lead}</p>
+   <p class="small" style="margin:0">${sub}</p>
+
+   <div class="bars" style="margin-top:16px">
+    <div class="bar">
+     <div class="t"><span>思い出す力（覚えた言葉）</span><span style="color:${cRecall.cls};font-weight:700">${cRecall.txt}</span></div>
+     <div class="small">今回：${entry.recall} / 3 個${prev? ' ／ 前回：'+prev.recall+' / 3 個':''}</div>
+    </div>
+    <div class="bar" style="margin-top:14px">
+     <div class="t"><span>数字クイズ</span><span style="color:${cCalc.cls};font-weight:700">${cCalc.txt}</span></div>
+     <div class="small">今回：${entry.calcCorrect} / ${entry.calcTotal} 問正解・${sec(entry.calcMs)}${prev? ' ／ 前回：'+prev.calcCorrect+' / '+(prev.calcTotal??3)+' 問':''}</div>
+    </div>
+    <div class="bar" style="margin-top:14px">
+     <div class="t"><span>出てきた言葉の数（「${convo.letter}」）</span><span style="color:${cFlu.cls};font-weight:700">${cFlu.txt}</span></div>
+     <div class="small">今回：${entry.fluency}個${prev? ' ／ 前回：'+prev.fluency+'個':''}</div>
+    </div>
+   </div>
+   ${watch ? `<div class="note" style="margin-top:16px">${watch}</div>` : ''}
+  </div>
+
+  ${log.length ? `<div class="card">
+   <div class="sec-label warm" style="margin-bottom:10px">これまでの記録（この端末内）</div>
+   <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <tr style="color:var(--sub);font-size:11px"><td style="padding:5px 8px">日付</td><td style="padding:5px 8px;text-align:right">思い出す</td><td style="padding:5px 8px;text-align:right">数字</td><td style="padding:5px 8px;text-align:right">言葉</td></tr>
+    ${histRows}
+   </table>
+   <p class="small" style="margin:10px 0 0">記録はこの端末の中だけに保存され、外部には送信されません。<button onclick="clearLog()" style="background:none;border:none;color:var(--warm);text-decoration:underline;cursor:pointer;font-size:12px;padding:0">記録を消す</button></p>
+  </div>` : `<div class="card"><p class="small" style="margin:0">今回がはじめての記録です。次回からは「前回の自分」とくらべて、変化を見守れます。記録はこの端末の中だけに保存されます。</p></div>`}
+
+  <div class="cta-box">
+   <h3>続けることが、いちばんの予防</h3>
+   <p>毎日のことば遊び・計算・会話・運動が、脳の元気を守ります。気になる変化が続くときは、早めの相談を。</p>
+   <a class="link" href="https://www.kaigokensaku.mhlw.go.jp/houkatsu/" target="_blank" rel="noopener">
+    <b>お住まいの地域包括支援センターを探す（厚生労働省）</b>
+    介護・認知症の無料相談窓口です ▶
+   </a>
+   <a class="link soft" href="#contact" onclick="alert('施設さがし・在宅介護のご相談は、ロイヤル介護の相談員までお気軽に。\\n（※公開デモのため、本番では相談フォーム／電話につながります）');return false;">
+    施設さがし・介護のご相談をする（無料）
+   </a>
+  </div>
+
+  <div class="card center">
+   <p class="small" style="margin:0 0 12px"><b>毎日、または週に1回</b>つづけると、自分の変化に気づきやすくなります。</p>
+   <div class="row">
+    <button class="btn warm" onclick="startConvo()">もう一度やってみる</button>
+    <button class="btn ghost" style="flex:1" onclick="location.reload()">最初の画面へ</button>
+   </div>
+  </div>
+ `;
+
+ // 記録を端末内に追記（前回比較のため）
+ log.push(entry); saveLog(log);
+
+ const r = document.getElementById('result');
+ r.innerHTML = html;
+ document.getElementById('convo').classList.add('hide');
+ r.classList.remove('hide');
+ window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
