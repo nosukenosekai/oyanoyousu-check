@@ -36,6 +36,18 @@
  .bubble.right{align-self:flex-end;background:var(--soft);border-color:var(--line)}
  .bubble.right::before{left:auto;right:22px}
  .bubble.right::after{left:auto;right:24px;border-top-color:var(--soft)}
+ /* 1つずつポンッと出るアニメーション（初期は“見える”状態＝アニメ非対応でも消えない） */
+ @keyframes pop{0%{opacity:0;transform:translateY(12px) scale(.94)}60%{transform:translateY(-2px) scale(1.02)}100%{opacity:1;transform:none}}
+ .bubbles .bubble{animation:pop .5s cubic-bezier(.22,1,.36,1) backwards}
+ .bubbles .bubble:nth-child(1){animation-delay:.15s}
+ .bubbles .bubble:nth-child(2){animation-delay:.6s}
+ .bubbles .bubble:nth-child(3){animation-delay:1.05s}
+ .bubbles .bubble:nth-child(4){animation-delay:1.5s}
+ .bubbles .bubble:nth-child(5){animation-delay:1.95s}
+ .bubble-lead{animation:pop .5s ease-out 2.45s backwards}
+ @media (prefers-reduced-motion: reduce){
+  .bubbles .bubble,.bubble-lead{animation:none}
+ }
  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 1px 3px rgba(20,60,70,.04)}
  .note{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--teal-d)}
  .note b{color:var(--teal-d)}
@@ -109,8 +121,11 @@
   <div class="bubbles">
    <div class="bubble">また同じ話をしている…</div>
    <div class="bubble right">あれ、約束を忘れてる?</div>
+   <div class="bubble">財布を、よく探すように…</div>
+   <div class="bubble right">料理の味、変わったかも</div>
+   <div class="bubble">出かけるのを億劫がる…</div>
   </div>
-  <p class="lead">その小さな変化に、最初に気づけるのはご家族です。</p>
+  <p class="lead bubble-lead">その小さな変化に、最初に気づけるのはご家族です。</p>
 
   <p class="fineprint">※これは診断ではありません。気になる点はかかりつけ医・地域包括支援センターへ。<br>🔒 入力は端末内のみで処理・外部送信なし（記録も端末内・いつでも消去可）。</p>
 
