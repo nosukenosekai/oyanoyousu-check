@@ -98,6 +98,20 @@
  .habit .he{font-size:20px;flex:0 0 auto}
  .habit .hl{flex:1}
  .habit .hc{color:var(--teal);font-weight:800;flex:0 0 auto;width:18px;text-align:center}
+ /* 脳トレゲーム */
+ .gboard{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+ .gtile{aspect-ratio:1/1;border:1.5px solid var(--teal);border-radius:12px;background:var(--teal);color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+ .gtile.up{background:#fff}
+ .gtile.done{background:var(--soft);border-color:var(--soft);opacity:.55}
+ .gorder{position:relative;width:100%;height:320px;background:var(--soft);border:1.5px solid var(--line);border-radius:14px;overflow:hidden}
+ .gnum{position:absolute;width:44px;height:44px;border-radius:50%;border:none;background:var(--teal);color:#fff;font-size:18px;font-weight:800;cursor:pointer;transform:translate(-50%,-50%);font-family:inherit}
+ .gnum.done{background:#fff;color:var(--sub);border:1.5px solid var(--line)}
+ .gspot{display:grid;gap:8px;margin:12px 0}
+ .gspot button{aspect-ratio:1/1;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
+ @keyframes shake{0%,100%{transform:translate(-50%,-50%)}25%{transform:translate(calc(-50% - 6px),-50%)}75%{transform:translate(calc(-50% + 6px),-50%)}}
+ @keyframes shake2{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+ .gnum.shake{animation:shake .3s}
+ .gspot button.shake{animation:shake2 .3s}
  footer{margin-top:30px;font-size:11.5px;color:var(--sub);line-height:1.8}
  footer hr{border:none;border-top:1px solid var(--line);margin:18px 0}
  .hide{display:none}
@@ -148,6 +162,9 @@
 
  <!-- HOME（本人の毎日：今日のトレーニング＋連続記録＋予防習慣チェック） -->
  <section id="home" class="hide"></section>
+
+ <!-- GAMES（遊べる脳トレ集） -->
+ <section id="games" class="hide"></section>
 
  <!-- CONVO（本人向け・会話/ことば遊び・時間とテンポを端末内で計測） -->
  <section id="convo" class="hide">
@@ -218,10 +235,13 @@ const HABIT_DEFS = [
  ['mizu','💧','水分をとった'],
 ];
 
+function hideAllSections(){
+ ['intro','quiz','home','games','convo','result'].forEach(id => {
+  const el = document.getElementById(id); if(el) el.classList.add('hide');
+ });
+}
 function startHome(){
- document.getElementById('intro').classList.add('hide');
- document.getElementById('result').classList.add('hide');
- document.getElementById('convo').classList.add('hide');
+ hideAllSections();
  document.getElementById('home').classList.remove('hide');
  renderHome();
  window.scrollTo(0,0);
@@ -256,6 +276,12 @@ function renderHome(){
   </div>
 
   <div class="card">
+   <div class="sec-label warm" style="margin-bottom:8px">脳トレで遊ぶ</div>
+   <p class="small" style="margin:0 0 12px">カードあわせ・順番タッチ・まちがい探し。ゲーム感覚で、楽しく脳の体操。</p>
+   <button class="btn warm" style="width:100%" onclick="startGames()">脳トレで遊ぶ</button>
+  </div>
+
+  <div class="card">
    <div class="sec-label" style="margin-bottom:8px">今日の予防習慣チェック（<span id="habitCount">${habitDone}/5</span>）</div>
    <p class="small" style="margin:0 0 10px">できたものを押してください。運動・会話・食事・睡眠・水分は、脳の元気を守る土台です。</p>
    ${habitHtml}
@@ -286,6 +312,192 @@ function toggleHabit(k){
  const lbl = document.getElementById('habitCount'); if(lbl) lbl.textContent = cnt + '/5';
  const sn = document.getElementById('streakNum'); if(sn) sn.textContent = calcStreak(loadActive());
  const mn = document.getElementById('monthNum'); if(mn) mn.textContent = monthCount(loadActive());
+}
+
+/* ============================================================
+   脳トレゲーム（遊べる）：カードあわせ／順番タッチ／まちがい探し
+   ・自己ベストを端末内(game_best_v1)に記録・前回とだけ比較
+   ・クリアで markActiveToday()＝連続記録に反映
+   ・ゲームの盤面は毎回ランダム（Math.random可＝日替わり固定の対象外）
+   ============================================================ */
+const GAME_KEY = 'game_best_v1';
+function loadBest(){ try { return JSON.parse(localStorage.getItem(GAME_KEY) || '{}'); } catch { return {}; } }
+function saveBest(o){ try { localStorage.setItem(GAME_KEY, JSON.stringify(o)); } catch {} }
+function gshuffle(a){ a = a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function gpick(a,n){ return gshuffle(a).slice(0,n); }
+const sec1 = ms => (ms/1000).toFixed(1)+'秒';
+
+const MATCH_EMOJI = ['🍎','🐶','🚗','🌸','⭐','🐟','🍰','🌙','🎈','🐱','☀️','🍇','🦋','🍄','🎵','🐤','🌷','🍓'];
+const SPOT_PAIRS = [['🐶','🐺'],['🍎','🍏'],['😀','😄'],['🌸','🌺'],['🐟','🐠'],['🚗','🚙'],['⭐','🌟'],['🐱','🐯'],['🌙','🌛'],['🍊','🍋'],['🐰','🐹'],['🌷','🌹'],['🐮','🐷'],['🍇','🍆']];
+
+function startGames(){
+ hideAllSections();
+ document.getElementById('games').classList.remove('hide');
+ renderGames();
+ window.scrollTo(0,0);
+}
+function renderGames(){
+ const best = loadBest();
+ const rec = (o, fn) => o ? fn(o) : 'まだ記録がありません';
+ document.getElementById('games').innerHTML = `
+  <div class="home-greet">脳トレで遊ぶ</div>
+  <p class="small" style="margin:0 0 12px">楽しく続けるのがいちばんの予防。好きな遊びを選んでください。</p>
+
+  <div class="card">
+   <div class="sec-label warm" style="margin-bottom:6px">🃏 カードあわせ（神経衰弱）</div>
+   <p class="small" style="margin:0 0 10px">同じ絵を2枚さがす、記憶の遊び。${rec(best.match, o => '最高記録：'+o.moves+'手・'+sec1(o.ms))}</p>
+   <button class="btn warm" style="width:100%" onclick="startMatch()">あそぶ</button>
+  </div>
+
+  <div class="card">
+   <div class="sec-label warm" style="margin-bottom:6px">🔢 順番タッチ</div>
+   <p class="small" style="margin:0 0 10px">1→2→3…の順に、すばやくタッチ。${rec(best.order, o => '最高記録：'+sec1(o.ms))}</p>
+   <button class="btn warm" style="width:100%" onclick="startOrder()">あそぶ</button>
+  </div>
+
+  <div class="card">
+   <div class="sec-label warm" style="margin-bottom:6px">🔍 まちがい探し</div>
+   <p class="small" style="margin:0 0 10px">1つだけ違う絵をさがす。${rec(best.spot, o => '最高記録：'+o.cleared+'問・'+sec1(o.ms))}</p>
+   <button class="btn warm" style="width:100%" onclick="startSpot()">あそぶ</button>
+  </div>
+
+  <div class="card center"><button class="btn ghost" onclick="startHome()">ホームへ戻る</button></div>
+ `;
+}
+
+function gameCelebrate(title, detail, retryFn){
+ document.getElementById('games').innerHTML = `
+  <div class="card center" style="margin-top:24px">
+   <div style="font-size:46px">🎉</div>
+   <h3 style="margin:8px 0 4px;color:var(--teal);font-size:19px">${title}</h3>
+   <p style="margin:0 0 4px;font-size:16px;font-weight:700">${detail}</p>
+   <p class="small" style="margin:0 0 18px">よくがんばりました！続けると、自分の変化に気づきやすくなります。</p>
+   <div class="row">
+    <button class="btn warm" onclick="${retryFn}()">もう1回</button>
+    <button class="btn ghost" style="flex:1" onclick="startGames()">ほかの脳トレ</button>
+   </div>
+   <button class="btn ghost" style="width:100%;margin-top:8px" onclick="startHome()">ホームへ戻る</button>
+  </div>
+ `;
+ window.scrollTo(0,0);
+}
+
+/* --- カードあわせ（神経衰弱） --- */
+let gm = {};
+function startMatch(){
+ const es = gpick(MATCH_EMOJI, 6);
+ gm = { cards: gshuffle(es.concat(es)), up: [], matched: [], moves: 0, started: 0, lock: false };
+ const tiles = gm.cards.map((e,i) => '<button class="gtile" data-i="'+i+'" onclick="flipCard('+i+')"></button>').join('');
+ document.getElementById('games').innerHTML = `
+  <div class="home-greet">カードあわせ</div>
+  <p class="small" style="margin:0 0 4px">同じ絵を2枚めくって、そろえましょう。</p>
+  <div id="matchInfo" class="small" style="margin:0 0 6px">てかず：0</div>
+  <div class="gboard">${tiles}</div>
+  <div class="card center"><button class="btn ghost" onclick="startGames()">やめる</button></div>
+ `;
+ window.scrollTo(0,0);
+}
+function flipCard(i){
+ if(gm.lock || gm.matched.includes(i) || gm.up.includes(i)) return;
+ if(!gm.started) gm.started = performance.now();
+ const t = document.querySelector('.gtile[data-i="'+i+'"]');
+ t.classList.add('up'); t.textContent = gm.cards[i];
+ gm.up.push(i);
+ if(gm.up.length === 2){
+  gm.moves++; document.getElementById('matchInfo').textContent = 'てかず：'+gm.moves;
+  const [a,b] = gm.up;
+  if(gm.cards[a] === gm.cards[b]){
+   gm.matched.push(a,b); gm.up = [];
+   setTimeout(() => document.querySelectorAll('.gtile[data-i="'+a+'"],.gtile[data-i="'+b+'"]').forEach(x => x.classList.add('done')), 200);
+   if(gm.matched.length === gm.cards.length) setTimeout(finishMatch, 500);
+  } else {
+   gm.lock = true;
+   setTimeout(() => {
+    [a,b].forEach(k => { const x = document.querySelector('.gtile[data-i="'+k+'"]'); if(x){ x.classList.remove('up'); x.textContent = ''; } });
+    gm.up = []; gm.lock = false;
+   }, 850);
+  }
+ }
+}
+function finishMatch(){
+ const ms = Math.round(performance.now() - gm.started); markActiveToday();
+ const best = loadBest(), prev = best.match;
+ const isBest = !prev || gm.moves < prev.moves || (gm.moves === prev.moves && ms < prev.ms);
+ if(isBest){ best.match = { moves: gm.moves, ms }; saveBest(best); }
+ gameCelebrate('カードあわせ クリア！', 'てかず '+gm.moves+'・'+sec1(ms)+(isBest ? '　🎉自己ベスト！' : ''), 'startMatch');
+}
+
+/* --- 順番タッチ --- */
+let go = {};
+function startOrder(){
+ const N = 12, cols = 3, rows = 4, cells = [];
+ for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) cells.push([c,r]);
+ const nums = gshuffle([...Array(N).keys()]);
+ const clamp = (v) => Math.max(9, Math.min(91, v));
+ go = { N, next: 1, started: 0 };
+ go.buttons = cells.map(([c,r], idx) => ({
+  n: nums[idx] + 1,
+  x: clamp((c + 0.5)/cols*100 + (Math.random()*16 - 8)),
+  y: clamp((r + 0.5)/rows*100 + (Math.random()*12 - 6)),
+ }));
+ const btns = go.buttons.map(b => '<button class="gnum" data-n="'+b.n+'" style="left:'+b.x+'%;top:'+b.y+'%" onclick="tapOrder('+b.n+',this)">'+b.n+'</button>').join('');
+ document.getElementById('games').innerHTML = `
+  <div class="home-greet">順番タッチ</div>
+  <p class="small" style="margin:0 0 6px">1 → 2 → 3 … の順に、できるだけ早くタッチ！</p>
+  <div id="orderInfo" class="small" style="margin:0 0 6px">つぎ：1</div>
+  <div class="gorder">${btns}</div>
+  <div class="card center" style="margin-top:12px"><button class="btn ghost" onclick="startGames()">やめる</button></div>
+ `;
+ window.scrollTo(0,0);
+}
+function tapOrder(n, el){
+ if(n !== go.next){ el.classList.add('shake'); setTimeout(() => el.classList.remove('shake'), 300); return; }
+ if(!go.started) go.started = performance.now();
+ el.classList.add('done'); el.disabled = true;
+ go.next++;
+ document.getElementById('orderInfo').textContent = go.next > go.N ? 'ゴール！' : 'つぎ：'+go.next;
+ if(go.next > go.N){
+  const ms = Math.round(performance.now() - go.started); markActiveToday();
+  const best = loadBest(), prev = best.order, isBest = !prev || ms < prev.ms;
+  if(isBest){ best.order = { ms }; saveBest(best); }
+  setTimeout(() => gameCelebrate('順番タッチ クリア！', sec1(ms)+(isBest ? '　🎉自己ベスト！' : ''), 'startOrder'), 300);
+ }
+}
+
+/* --- まちがい探し --- */
+let gs = {};
+function startSpot(){ gs = { round: 1, total: 6, score: 0, started: performance.now() }; renderSpot(); window.scrollTo(0,0); }
+function renderSpot(){
+ const sizes = [4,6,9,12,16,20];
+ const n = sizes[Math.min(gs.round - 1, sizes.length - 1)];
+ const cols = Math.ceil(Math.sqrt(n));
+ const pair = SPOT_PAIRS[Math.floor(Math.random()*SPOT_PAIRS.length)];
+ gs.odd = Math.floor(Math.random()*n);
+ let cells = '';
+ for(let i=0;i<n;i++) cells += '<button onclick="tapSpot('+i+')">'+(i === gs.odd ? pair[1] : pair[0])+'</button>';
+ document.getElementById('games').innerHTML = `
+  <div class="home-greet">まちがい探し</div>
+  <p class="small" style="margin:0 0 6px">1つだけ ちがう絵があります。さがしてタッチ！（${gs.round} / ${gs.total}）</p>
+  <div class="gspot" style="grid-template-columns:repeat(${cols},1fr)">${cells}</div>
+  <div class="card center" style="margin-top:12px"><button class="btn ghost" onclick="startGames()">やめる</button></div>
+ `;
+}
+function tapSpot(i){
+ if(i === gs.odd){
+  gs.score++;
+  if(gs.round >= gs.total) finishSpot();
+  else { gs.round++; renderSpot(); window.scrollTo(0,0); }
+ } else {
+  const b = document.querySelectorAll('.gspot button')[i];
+  if(b){ b.classList.add('shake'); setTimeout(() => b.classList.remove('shake'), 300); }
+ }
+}
+function finishSpot(){
+ const ms = Math.round(performance.now() - gs.started); markActiveToday();
+ const best = loadBest(), prev = best.spot;
+ const isBest = !prev || gs.score > prev.cleared || (gs.score === prev.cleared && ms < prev.ms);
+ if(isBest){ best.spot = { cleared: gs.score, ms }; saveBest(best); }
+ gameCelebrate('まちがい探し クリア！', gs.score+'問クリア・'+sec1(ms)+(isBest ? '　🎉自己ベスト！' : ''), 'startSpot');
 }
 
 /* ---------- 設問定義（臨床尺度ではなく“気づき”観察。断定しない） ---------- */
@@ -329,8 +541,7 @@ function buildQueue(){
 
 function start(){
  buildQueue(); idx = 0;
- document.getElementById('intro').classList.add('hide');
- document.getElementById('result').classList.add('hide');
+ hideAllSections();
  document.getElementById('quiz').classList.remove('hide');
  render();
  window.scrollTo(0,0);
@@ -759,8 +970,7 @@ function startConvo(){
   words: [], times: [],
  };
  convoStep = 0;
- document.getElementById('intro').classList.add('hide');
- document.getElementById('result').classList.add('hide');
+ hideAllSections();
  document.getElementById('convo').classList.remove('hide');
  renderConvo();
  window.scrollTo(0,0);
