@@ -219,6 +219,10 @@ document.body.style.zoom = 1.55;
 const ACT_KEY = 'active_dates_v1';   // 取り組んだ日（YYYY-MM-DD）の集合
 const HABIT_KEY = 'habit_log_v1';     // 日付ごとの予防習慣チェック
 function ymd(d){ d = d || new Date(); const m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0'); return d.getFullYear()+'-'+m+'-'+day; }
+// カナ正規化（カタカナ→ひらがな、記号除去）＝語想起の正確な判定・重複除去用
+function kata2hira(s){ return (s||'').replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60)); }
+function normWord(s){ return kata2hira((s||'').trim()).replace(/[\s・、。,.]/g,''); }
+function firstKana(s){ return normWord(s).charAt(0); }
 function loadActive(){ try { return new Set(JSON.parse(localStorage.getItem(ACT_KEY) || '[]')); } catch { return new Set(); } }
 function saveActive(set){ try { localStorage.setItem(ACT_KEY, JSON.stringify([...set].slice(-400))); } catch {} }
 function markActiveToday(){ const s = loadActive(); s.add(ymd()); saveActive(s); }
@@ -1024,10 +1028,12 @@ function renderConvo(){
    <input id="cWord" type="text" placeholder="${letter}…"
      style="width:100%;padding:13px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;font-family:inherit" />
    <div id="cChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px"></div>
-   <div id="cCount" class="small" style="margin-top:8px">あつめた言葉：0個</div>
+   <div id="cCount" class="small" style="margin-top:8px">「${letter}」で始まる言葉：0個</div>
+   <p class="small" style="margin:6px 0 0;color:var(--sub)">※「${letter}」で始まる言葉だけ数えます（同じ言葉は1回）。</p>
    <button class="btn ghost" style="width:100%;margin-top:12px" onclick="finishFluency()">おわる</button>
   `;
   convo.words = []; convo.times = [];
+  convo._seen = new Set(); convo._valid = 0;
   tShown = performance.now();
   const w = document.getElementById('cWord');
   // IME対応：変換確定のEnterでは送らない（chat-enterルール）
@@ -1081,21 +1087,28 @@ function addWord(){
  const w = document.getElementById('cWord');
  const v = (w.value||'').trim();
  if(!v) return;
- // 間違いも責めない＝そのまま受ける
  convo.words.push(v);
- convo.times.push(Math.round(performance.now() - tShown));
+ // 正確な判定：対象の文字で始まる & 重複でない ものだけ有効カウント
+ const key = normWord(v);
+ const isDup = convo._seen.has(key);
+ const isValid = firstKana(v) === convo.letter && !isDup;
+ convo._seen.add(key);
+ if(isValid){ convo._valid++; convo.times.push(Math.round(performance.now() - tShown)); }
  w.value = '';
+ // チップ表示：有効はそのまま／対象外・重複は薄く（責めず“数に入らない”ことだけ示す）
  const c = document.createElement('span');
  c.textContent = v;
- c.style.cssText = 'font-size:13px;padding:5px 11px;border-radius:99px;background:var(--soft);border:1px solid var(--line);color:var(--teal-d)';
+ c.style.cssText = isValid
+   ? 'font-size:13px;padding:5px 11px;border-radius:99px;background:var(--soft);border:1px solid var(--line);color:var(--teal-d)'
+   : 'font-size:13px;padding:5px 11px;border-radius:99px;background:#fff;border:1px dashed var(--line);color:var(--sub);opacity:.7';
  document.getElementById('cChips').appendChild(c);
- document.getElementById('cCount').textContent = `あつめた言葉：${convo.words.length}個`;
+ document.getElementById('cCount').textContent = `「${convo.letter}」で始まる言葉：${convo._valid}個`;
  w.focus();
 }
 
 function finishFluency(){
  if(convoTimer){ clearInterval(convoTimer); convoTimer=null; }
- convo.fluency = (convo.words||[]).length;
+ convo.fluency = convo._valid || 0;   // 有効（対象の文字で始まる・重複なし）だけを正確にカウント
  convo.firstWordMs = (convo.times && convo.times.length) ? convo.times[0] : null;
  convoStep = 3;
  renderConvo();
@@ -1192,8 +1205,8 @@ function showConvoResult(){
      <div class="small">今回：${entry.calcCorrect} / ${entry.calcTotal} 問正解・${sec(entry.calcMs)}${prev? ' ／ 前回：'+prev.calcCorrect+' / '+(prev.calcTotal??3)+' 問':''}</div>
     </div>
     <div class="bar" style="margin-top:14px">
-     <div class="t"><span>出てきた言葉の数（「${convo.letter}」）</span><span style="color:${cFlu.cls};font-weight:700">${cFlu.txt}</span></div>
-     <div class="small">今回：${entry.fluency}個${prev? ' ／ 前回：'+prev.fluency+'個':''}</div>
+     <div class="t"><span>出てきた言葉の数（「${convo.letter}」で始まる）</span><span style="color:${cFlu.cls};font-weight:700">${cFlu.txt}</span></div>
+     <div class="small">今回：${entry.fluency}個${prev? ' ／ 前回：'+prev.fluency+'個':''}<span style="color:var(--sub)">（対象の文字で始まる言葉のみ・重複は除く）</span></div>
     </div>
    </div>
    ${watch ? `<div class="note" style="margin-top:16px">${watch}</div>` : ''}
